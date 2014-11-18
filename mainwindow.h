@@ -8,7 +8,7 @@ struct Unit {
     float output;
     float inputs[4];
 
-    bool automatic;
+    bool automatic,active;
 };
 
 namespace Ui {
@@ -26,6 +26,8 @@ public:
         return inst;
     }
     Unit units[4];
+    float connectionStrength;
+    float viscosity;
     bool forceRand;
     int changes;
 

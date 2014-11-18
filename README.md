@@ -6,12 +6,19 @@ This program is a Qt4 simulation of W Ross Ashby's homeostat - read more in his 
 The four boxes are the four units of the homeostat. Within each unit:
 * the slider is the output of the unit, corresponding to the magnet position in the original machine. As well as being an output, it can be dragged to perturb the unit.
 * the four dials are the parameters, corresponding to the potentiometers and commutators in the original. Each dial is the amount the unit is affected by another unit - the first dial is unit A, the second is unit B and so on. The centre position means no effect, left of centre means a negative effect, right of centre means a positive effect. One of the dials will be a feedback parameter -  how the unit affects itself.
-* the auto checkbox is used to turn on the "outer feedback loop" for that unit. When it's on, if the output goes close to the maximum or minimum, the unit's parameters will be randomized (with the exception of the feedback dial, as per Ashby's original device). The check is made every 2 seconds.
+* the *auto* checkbox is used to turn on the "outer feedback loop" for that unit. When it's on, if the output goes close to the maximum or minimum, the unit's parameters will be randomized (with the exception of the feedback dial, as per Ashby's original device). The check is made every 2 seconds. When this is off, the output
+and parameters can be set by hand.
+* the *active* checkbox disables the unit, removing its influence from the
+others. It allows experiments to be performed on homeostats simpler than
+the 4-unit system.
 
-The simulation will run while the *running* checkbox is checked.
-
-The *reset graphs* button will clear the graphs (see below), and the *randomize* button will randomize all the parameters (except the feedbacks).
-
+Other controls:
+* The simulation will run while the *running* checkbox is checked.
+* The *reset graphs* button will clear the graphs (see below).
+* The *randomize* button will randomize all the parameters (except the feedbacks).
+* The *connection strength* slider modulates the global strength of all
+the connections.
+* The *viscosity* slider changes the speed at which the outputs can change.
 
 The three graphs at the bottom are phase space plots of the homeostat's state. From left to right, they are:
 * the output of B against the output of A

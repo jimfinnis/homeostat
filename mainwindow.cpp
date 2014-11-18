@@ -55,7 +55,12 @@ static int convertOutputSlider(float f){
 
 void MainWindow::setModelFromWidgets()
 {
+
+    connectionStrength = ((float)ui->connStrength->value())/100.0f;
+    viscosity = ((float)ui->viscosity->value())/100.0f;
+
     units[0].automatic = ui->automatic1->isChecked();
+    units[0].active = ui->active1->isChecked();
     units[0].inputs[0] = convertInputDial(ui->dialA1->value());
     units[0].inputs[1] = convertInputDial(ui->dialB1->value());
     units[0].inputs[2] = convertInputDial(ui->dialC1->value());
@@ -63,6 +68,7 @@ void MainWindow::setModelFromWidgets()
     units[0].output = convertInputSlider(ui->slider1->value());
 
     units[1].automatic = ui->automatic2->isChecked();
+    units[1].active = ui->active2->isChecked();
     units[1].inputs[0] = convertInputDial(ui->dialA2->value());
     units[1].inputs[1] = convertInputDial(ui->dialB2->value());
     units[1].inputs[2] = convertInputDial(ui->dialC2->value());
@@ -70,6 +76,7 @@ void MainWindow::setModelFromWidgets()
     units[1].output = convertInputSlider(ui->slider2->value());
 
     units[2].automatic = ui->automatic3->isChecked();
+    units[2].active = ui->active3->isChecked();
     units[2].inputs[0] = convertInputDial(ui->dialA3->value());
     units[2].inputs[1] = convertInputDial(ui->dialB3->value());
     units[2].inputs[2] = convertInputDial(ui->dialC3->value());
@@ -77,6 +84,7 @@ void MainWindow::setModelFromWidgets()
     units[2].output = convertInputSlider(ui->slider3->value());
 
     units[3].automatic = ui->automatic4->isChecked();
+    units[3].active = ui->active4->isChecked();
     units[3].inputs[0] = convertInputDial(ui->dialA4->value());
     units[3].inputs[1] = convertInputDial(ui->dialB4->value());
     units[3].inputs[2] = convertInputDial(ui->dialC4->value());
@@ -87,32 +95,40 @@ void MainWindow::setModelFromWidgets()
 void MainWindow::setWidgetsFromModel()
 {
     ui->automatic1->setChecked(units[0].automatic);
+    ui->active1->setChecked(units[0].active);
     ui->dialA1->setValue(convertOutputDial(units[0].inputs[0]));
     ui->dialB1->setValue(convertOutputDial(units[0].inputs[1]));
     ui->dialC1->setValue(convertOutputDial(units[0].inputs[2]));
     ui->dialD1->setValue(convertOutputDial(units[0].inputs[3]));
-    ui->slider1->setValue(convertOutputSlider(units[0].output));
+    if(units[0].automatic)
+        ui->slider1->setValue(convertOutputSlider(units[0].output));
 
     ui->automatic2->setChecked(units[1].automatic);
+    ui->active2->setChecked(units[1].active);
     ui->dialA2->setValue(convertOutputDial(units[1].inputs[0]));
     ui->dialB2->setValue(convertOutputDial(units[1].inputs[1]));
     ui->dialC2->setValue(convertOutputDial(units[1].inputs[2]));
     ui->dialD2->setValue(convertOutputDial(units[1].inputs[3]));
-    ui->slider2->setValue(convertOutputSlider(units[1].output));
+    if(units[1].automatic)
+        ui->slider2->setValue(convertOutputSlider(units[1].output));
 
     ui->automatic3->setChecked(units[2].automatic);
+    ui->active3->setChecked(units[2].active);
     ui->dialA3->setValue(convertOutputDial(units[2].inputs[0]));
     ui->dialB3->setValue(convertOutputDial(units[2].inputs[1]));
     ui->dialC3->setValue(convertOutputDial(units[2].inputs[2]));
     ui->dialD3->setValue(convertOutputDial(units[2].inputs[3]));
-    ui->slider3->setValue(convertOutputSlider(units[2].output));
+    if(units[2].automatic)
+        ui->slider3->setValue(convertOutputSlider(units[2].output));
 
     ui->automatic4->setChecked(units[3].automatic);
+    ui->active4->setChecked(units[3].active);
     ui->dialA4->setValue(convertOutputDial(units[3].inputs[0]));
     ui->dialB4->setValue(convertOutputDial(units[3].inputs[1]));
     ui->dialC4->setValue(convertOutputDial(units[3].inputs[2]));
     ui->dialD4->setValue(convertOutputDial(units[3].inputs[3]));
-    ui->slider4->setValue(convertOutputSlider(units[3].output));
+    if(units[3].automatic)
+        ui->slider4->setValue(convertOutputSlider(units[3].output));
 }
 
 bool MainWindow::outOfRange(int n){
@@ -120,17 +136,21 @@ bool MainWindow::outOfRange(int n){
     return fabsf(f)>0.7f;
 }
 
-#define STRENGTH 1.0f
 void MainWindow::processUnit(int n){
+    if(units[n].active){
+        float newval = 0.5f; // target value
 
-    float newval = 0.5f; // target value
+        for(int i=0;i<4;i++){
+            if(units[i].active)
+                newval -= units[n].inputs[i]*units[i].output*connectionStrength;
+        }
 
-    for(int i=0;i<4;i++){
-        newval -= units[n].inputs[i]*units[i].output;
+        float smoothing = (1.0f-viscosity)*0.1f;
+        units[n].output = (1.0f-smoothing)*units[n].output + smoothing*newval;
+        // clamp to end stops
+        if(units[n].output>1.0f)units[n].output=1.0f;
+        if(units[n].output<0.0f)units[n].output=0.0f;
     }
-
-    units[n].output = 0.99f*units[n].output + 0.01f*newval;
-
 }
 
 inline float randfloat(){
@@ -152,7 +172,7 @@ void MainWindow::tick()
 
     if(forceRand ||okToRandomize){
         for(int i=0;i<4;i++){
-            if(forceRand || r && units[i].automatic && outOfRange(i)){
+            if(forceRand || r && units[i].automatic && units[i].active && outOfRange(i)){
                 changes++;
                 for(int j=0;j<4;j++){
                     if(i!=j) // self-feedback has no uniselector

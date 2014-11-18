@@ -33,8 +33,8 @@ void Plot2D::paintEvent(QPaintEvent *e)
     float valx = m->units[xunit].output;
     float valy = m->units[yunit].output;
 
-    valx = valx*(float)(width()-4)+2;
-    valy = valy*(float)(height()-4)+2;
+    valx = valx*(float)(width()-30)+15;
+    valy = valy*(float)(height()-30)+15;
 
     buf->setPixel(QPoint(valx,valy),cols[m->changes % NUMCOLS]);
 
