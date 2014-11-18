@@ -23,3 +23,19 @@ The three graphs at the bottom are phase space plots of the homeostat's state. F
 * The target (i.e. the desired position) for all outputs is 0.5
 * The valid range (which doesn't trigger randomization) for the essential variables (the outputs) is -0.7 to 0.7
 * There is currently no way to build alternate configurations - all units affect all others
+
+## Building
+* Install Qt4
+* Clone the homeostat repo into a directory
+* Start Qt Creator
+* Open the project file
+* Configure as desired
+* Run
+
+Alternatively from the command line:
+* Install Qt4
+* Clone the homeostat repo into a directory
+* **cd** to the cloned directory
+* **qmake**
+* **make**
+* **./homeostat**
