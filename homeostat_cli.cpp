@@ -128,12 +128,13 @@ int run(int u,double c){
 
 int main(int argc,char *argv[]){
     printf("conn,count\n");
-    for(double d=0.1;d<3;d+=0.01){
+    int units = atoi(argv[1]);
+    for(double d=0.1;d<10;d+=0.01){
         long q=0;
         for(int i=0;i<5;i++){
-            q+=run(5,d);
+            q+=run(units,d);
         }
-        printf("%f,%ld\n",d,q);
+        printf("%f,%ld\n",d,q/5);
     }
 }
 
