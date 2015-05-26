@@ -18,6 +18,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plotAC->setUnits(0,2);
     ui->plotAD->setUnits(0,3);
 
+    elapsedTotal=0;
+    accumCount=0;
+    resetTime.start();
+    settled=false;
     timer.start(20);
     timer2.start(2000);
     okToRandomize=false;
@@ -58,6 +62,9 @@ void MainWindow::setModelFromWidgets()
 
     connectionStrength = ((float)ui->connStrength->value())/100.0f;
     viscosity = ((float)ui->viscosity->value())/100.0f;
+
+    ui->connLabel->setText(QString::number(connectionStrength));
+    ui->viscLabel->setText(QString::number(viscosity));
 
     units[0].automatic = ui->automatic1->isChecked();
     units[0].active = ui->active1->isChecked();
@@ -165,6 +172,7 @@ void MainWindow::tick()
     bool r = ui->running->isChecked();
     setModelFromWidgets();
 
+
     if(r){
         for(int i=0;i<4;i++)
             processUnit(i);
@@ -174,6 +182,7 @@ void MainWindow::tick()
         for(int i=0;i<4;i++){
             if(forceRand || r && units[i].automatic && units[i].active && outOfRange(i)){
                 changes++;
+                changedTime.start();
                 for(int j=0;j<4;j++){
                     if(i!=j) // self-feedback has no uniselector
                         units[i].inputs[j]=randfloat();
@@ -182,7 +191,18 @@ void MainWindow::tick()
         }
         okToRandomize=false;
         forceRand=false;
-
+        if(!settled && changedTime.elapsed()>5000){
+            int ms = resetTime.elapsed();
+            if(!ui->accumulate->isChecked()){
+                settled=true;
+                elapsedTotal=0;
+                accumCount=0;
+            } else {
+                randomize();
+            }
+            elapsedTotal += ms;accumCount++;
+            ui->timeLabel->setText(QString::number(elapsedTotal)+"/"+QString::number(accumCount));
+        }
     }
 
     ui->plotAB->repaint();
@@ -201,10 +221,14 @@ void MainWindow::resetGraphs()
     ui->plotAB->reset();
     ui->plotAC->reset();
     ui->plotAD->reset();
+    elapsedTotal=0;
+    accumCount=0;
 }
 
 void MainWindow::randomize()
 {
+    resetTime.start();
+    settled=false;
     forceRand=true;
 }
 

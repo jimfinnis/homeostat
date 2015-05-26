@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QTime>
 
 struct Unit {
     float output;
@@ -25,6 +26,7 @@ public:
     static MainWindow *getInstance(){
         return inst;
     }
+    bool settled;
     Unit units[4];
     float connectionStrength;
     float viscosity;
@@ -35,6 +37,9 @@ public:
 private:
     Ui::MainWindow *ui;
     QTimer timer,timer2;
+    QTime resetTime,changedTime;
+    long elapsedTotal;
+    int accumCount;
     static MainWindow *inst;
 
     void setModelFromWidgets();
